@@ -1,5 +1,8 @@
 package com.example.peeyush.myapplication;
 
+import com.example.peeyush.myapplication.piadapter.PIImage;
+import com.example.peeyush.myapplication.piadapter.PIText;
+
 /**
  * Created by peeyush on 14/10/15.
  */

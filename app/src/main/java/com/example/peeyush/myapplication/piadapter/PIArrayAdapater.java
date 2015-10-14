@@ -1,4 +1,4 @@
-package com.example.peeyush.myapplication;
+package com.example.peeyush.myapplication.piadapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.peeyush.myapplication.piadapter.PIImage;
+import com.example.peeyush.myapplication.piadapter.PIText;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
