@@ -2,6 +2,7 @@ package com.example.peeyush.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -63,6 +64,9 @@ public class MainActivity extends AppCompatActivity
             CustomModelClass customModelClass = new CustomModelClass();
             customModelClass.mImagePath="http://www2.psd100.com/ppp/2013/11/0601/Cute-penguin-icon-1106085131.png";
             customModelClass.mName = "Peeyush-"+i;
+            customModelClass.mComplete = (int) (Math.random()*100);
+            customModelClass.mArcColor = (int) (Math.random()*0xFFFFFF);
+            customModelClass.mArcColor+= 0xFF000000;
             dataList.add(customModelClass);
         }
 

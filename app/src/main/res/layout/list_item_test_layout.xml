@@ -3,6 +3,9 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include android:id="@+id/bv_test"
+        layout="@layout/pi_circulaar_arc_layout"/>
+
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"

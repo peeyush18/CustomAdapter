@@ -9,7 +9,7 @@
     android:id="@+id/rl_main_containner"
     tools:context="com.example.peeyush.myapplication.circleImage">
 
-    <com.example.peeyush.myapplication.piadapter.BallView
+    <com.example.peeyush.myapplication.circular_arc.BallView
         android:id="@+id/bv_pi_arc"
         android:layout_width="100dp"
         android:layout_height="100dp"

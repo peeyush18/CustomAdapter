@@ -3,16 +3,22 @@ package com.example.peeyush.myapplication.piadapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.peeyush.myapplication.R;
+import com.example.peeyush.myapplication.circular_arc.BallView;
 import com.example.peeyush.myapplication.piadapter.PIImage;
 import com.example.peeyush.myapplication.piadapter.PIText;
+
+import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -56,7 +62,7 @@ public class PIArrayAdapater extends ArrayAdapter{
        // View[] itemViews = new View[mSourceIdArray.length];
         for(Field field: fields){
             try {
-                setupView(convertView, field, mItemDataList.get(position));
+                setupView(convertView, field, mItemDataList.get(position), fields);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -65,7 +71,7 @@ public class PIArrayAdapater extends ArrayAdapter{
         return convertView;
     }
 
-    private void setupView(View parent, Field field, Object o) throws IllegalAccessException {
+    private void setupView(View parent, Field field, Object o, Field[] fields) throws IllegalAccessException {
         Annotation[] annotations = field.getDeclaredAnnotations();
         for(Annotation annotation: annotations){
             if(annotation instanceof PIImage){
@@ -76,8 +82,38 @@ public class PIArrayAdapater extends ArrayAdapter{
             }else if(annotation instanceof PIText){
                 TextView textView = (TextView)parent.findViewById(((PIText) annotation).id());
                 textView.setText((String)field.get(o));
+            }else if(annotation instanceof PIBall){
+                RelativeLayout relativeLayout = (RelativeLayout)parent.findViewById(((PIBall) annotation).id());
+                BallView ballView = (BallView)relativeLayout.findViewById(R.id.bv_pi_arc);
+                TextView textView = (TextView)relativeLayout.findViewById(R.id.tv_pi_complete_text);
+                setupArc(o, field, fields, ballView, textView);
             }
         }
+    }
+
+    private void setupArc(Object o, Field field, Field[] fields, BallView ballView, TextView textView) throws IllegalAccessException {
+        int color = getColor(o, fields);
+        int complete = (int) field.get(o);
+        ballView.setColor(color);
+        ballView.setComplete(complete);
+        textView.setText(complete+"%");
+    }
+
+    private int getColor(Object o, Field[] fields) {
+        for(Field field: fields){
+            Annotation annotation = field.getAnnotation(PiBallColor.class);
+            if(annotation != null){
+                try {
+                    int color = (int) field.get(o);
+                    return color;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    return Color.DKGRAY;
+                }
+            }
+        }
+
+        return Color.DKGRAY;
     }
 
     private View setView(View parent, int viewId, Class viewClass, String src) {

@@ -1,7 +1,9 @@
 package com.example.peeyush.myapplication;
 
+import com.example.peeyush.myapplication.piadapter.PIBall;
 import com.example.peeyush.myapplication.piadapter.PIImage;
 import com.example.peeyush.myapplication.piadapter.PIText;
+import com.example.peeyush.myapplication.piadapter.PiBallColor;
 
 /**
  * Created by peeyush on 14/10/15.
@@ -12,4 +14,8 @@ public class CustomModelClass {
     public String mImagePath;
     @PIText(id=R.id.tv_test)
     public String mName;
+    @PIBall(id=R.id.bv_test)
+    public int mComplete;
+    @PiBallColor()
+    public int mArcColor;
 }
