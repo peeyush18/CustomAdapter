@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,11 +30,32 @@ import java.util.ArrayList;
 /**
  * Created by peeyush on 14/10/15.
  */
-public class PIArrayAdapater extends ArrayAdapter{
+public class PIArrayAdapater extends ArrayAdapter {
 
     ArrayList mItemDataList;
     int mLayoutResource;
     Class mModelClass;
+
+    final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+    final int cacheSize = maxMemory / 8;
+    LruCache<String, Bitmap> mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+
+        @Override
+        protected int sizeOf(String key, Bitmap value) {
+//            return super.sizeOf(key, value);
+            return value.getByteCount() / 1024;
+        }
+
+        public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+            if (getBitmapFromMemCache(key) == null) {
+                mMemoryCache.put(key, bitmap);
+            }
+        }
+
+        public Bitmap getBitmapFromMemCache(String key) {
+            return mMemoryCache.get(key);
+        }
+    };
 
 
     public PIArrayAdapater(Context context, int resource, Class modelClass,
@@ -43,7 +65,7 @@ public class PIArrayAdapater extends ArrayAdapter{
 //        mSourceIdArray = sourceIdArray;
 //        mSourceTypeArray = sourceTypeArray;
         mItemDataList = dataList;
-        mModelClass =modelClass;
+        mModelClass = modelClass;
     }
 
     @Override
@@ -59,8 +81,8 @@ public class PIArrayAdapater extends ArrayAdapter{
 
 
         Field[] fields = mModelClass.getDeclaredFields();
-       // View[] itemViews = new View[mSourceIdArray.length];
-        for(Field field: fields){
+        // View[] itemViews = new View[mSourceIdArray.length];
+        for (Field field : fields) {
             try {
                 setupView(convertView, field, mItemDataList.get(position), fields);
             } catch (IllegalAccessException e) {
@@ -73,19 +95,19 @@ public class PIArrayAdapater extends ArrayAdapter{
 
     private void setupView(View parent, Field field, Object o, Field[] fields) throws IllegalAccessException {
         Annotation[] annotations = field.getDeclaredAnnotations();
-        for(Annotation annotation: annotations){
-            if(annotation instanceof PIImage){
-                ImageView imageView = (ImageView)parent.findViewById(((PIImage) annotation).id());
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof PIImage) {
+                ImageView imageView = (ImageView) parent.findViewById(((PIImage) annotation).id());
                 ImageDowloader imageDowloader = new ImageDowloader(imageView, ((PIImage) annotation).width(),
                         ((PIImage) annotation).height());
-                imageDowloader.execute((String)field.get(o));
-            }else if(annotation instanceof PIText){
-                TextView textView = (TextView)parent.findViewById(((PIText) annotation).id());
-                textView.setText((String)field.get(o));
-            }else if(annotation instanceof PIBall){
-                RelativeLayout relativeLayout = (RelativeLayout)parent.findViewById(((PIBall) annotation).id());
-                BallView ballView = (BallView)relativeLayout.findViewById(R.id.bv_pi_arc);
-                TextView textView = (TextView)relativeLayout.findViewById(R.id.tv_pi_complete_text);
+                imageDowloader.execute((String) field.get(o));
+            } else if (annotation instanceof PIText) {
+                TextView textView = (TextView) parent.findViewById(((PIText) annotation).id());
+                textView.setText((String) field.get(o));
+            } else if (annotation instanceof PIBall) {
+                RelativeLayout relativeLayout = (RelativeLayout) parent.findViewById(((PIBall) annotation).id());
+                BallView ballView = (BallView) relativeLayout.findViewById(R.id.bv_pi_arc);
+                TextView textView = (TextView) relativeLayout.findViewById(R.id.tv_pi_complete_text);
                 setupArc(o, field, fields, ballView, textView);
             }
         }
@@ -96,13 +118,13 @@ public class PIArrayAdapater extends ArrayAdapter{
         int complete = (int) field.get(o);
         ballView.setColor(color);
         ballView.setComplete(complete);
-        textView.setText(complete+"%");
+        textView.setText(complete + "%");
     }
 
     private int getColor(Object o, Field[] fields) {
-        for(Field field: fields){
+        for (Field field : fields) {
             Annotation annotation = field.getAnnotation(PiBallColor.class);
-            if(annotation != null){
+            if (annotation != null) {
                 try {
                     int color = (int) field.get(o);
                     return color;
@@ -117,13 +139,13 @@ public class PIArrayAdapater extends ArrayAdapter{
     }
 
     private View setView(View parent, int viewId, Class viewClass, String src) {
-        View itemView=null;
-        if(viewClass.equals(ImageView.class)){
+        View itemView = null;
+        if (viewClass.equals(ImageView.class)) {
 
-        }else if(viewClass.equals(TextView.class)){
-            TextView textView = (TextView)parent.findViewById(viewId);
+        } else if (viewClass.equals(TextView.class)) {
+            TextView textView = (TextView) parent.findViewById(viewId);
             textView.setText(src);
-            itemView= textView;
+            itemView = textView;
         }
         return itemView;
     }
@@ -134,13 +156,13 @@ public class PIArrayAdapater extends ArrayAdapter{
     }
 
 
-    class ImageDowloader extends AsyncTask<String, Integer ,Bitmap>{
+    class ImageDowloader extends AsyncTask<String, Integer, Bitmap> {
 
         ImageView mImageView;
         int mWidth;
         int mHeight;
 
-        ImageDowloader(ImageView imageView, int width, int height){
+        ImageDowloader(ImageView imageView, int width, int height) {
             mImageView = imageView;
             mWidth = width;
             mHeight = height;
@@ -148,14 +170,19 @@ public class PIArrayAdapater extends ArrayAdapter{
 
         @Override
         protected Bitmap doInBackground(String... params) {
-            String imageSource= params[0];
-            Bitmap bit=null;
+            String imageSource = params[0];
+            Bitmap bit = null;
             try {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
-                bit = BitmapFactory.decodeStream((InputStream) new URL(imageSource).getContent(),
-                        null,
-                        null);
+                bit = mMemoryCache.get(imageSource);
+                if (bit == null){
+                    bit = BitmapFactory.decodeStream((InputStream) new URL(imageSource).getContent(),
+                            null,
+                            null);
+                    mMemoryCache.put(imageSource, bit);
+                }
+
 //                bit =ImageUtil.decodeSampledBitmapFromResource(options,
 //                        (InputStream) new URL(imageSource).getContent(),
 //                        mWidth,
@@ -170,7 +197,7 @@ public class PIArrayAdapater extends ArrayAdapter{
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            if(bitmap!=null)
+            if (bitmap != null)
                 mImageView.setImageBitmap(bitmap);
         }
     }

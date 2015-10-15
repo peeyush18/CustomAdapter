@@ -11,11 +11,11 @@
 
     <com.example.peeyush.myapplication.circular_arc.BallView
         android:id="@+id/bv_pi_arc"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:complete="50"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:complete="100"
         app:arc_color="#234323"/>
-    s<TextView
+    <TextView
         android:id="@+id/tv_pi_complete_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -55,24 +55,18 @@ public class BallView  extends View {
     }
 
     private void PaintArc(Canvas canvas) {
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setAntiAlias(true);
-        p.setStyle(Paint.Style.STROKE);
-        p.setStrokeWidth(2);
-        p.setColor(Color.RED);
-
-        Paint p1 = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p1.setAntiAlias(true);
-        p1.setStyle(Paint.Style.STROKE);
-        p1.setStrokeWidth(10);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(10);
         if(mComplete>0)
-            p1.setColor(mColor);
+            paint.setColor(mColor);
         else
-            p1.setColor(Color.DKGRAY);
+            paint.setColor(Color.DKGRAY);
 
         RectF oval3 = new RectF(10, 10, getWidth()-10, getHeight()-10);
 
         float val = (float)mComplete/100;
-        canvas.drawArc(oval3, -90, -(360*val), false, p1);
+        canvas.drawArc(oval3, -90, -(360*val), false, paint);
     }
 }
