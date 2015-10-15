@@ -41,16 +41,13 @@ public class circleImage extends AppCompatActivity {
     }
 
     void setupCirlce(RelativeLayout container){
-        container.addView(new BallView(getApplicationContext()));
 
-        TextView textView = new TextView(getApplicationContext());
-        LinearLayout.LayoutParams layoutParams= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.gravity = Gravity.CENTER;
-        layoutParams.setMargins(0, 25, 0,0);
-        textView.setLayoutParams(layoutParams);
-        textView.setText("12%");
-        textView.setTextColor(Color.BLACK);
-        container.addView(textView);
+        BallView ballView = (BallView)container.findViewById(R.id.bv_pi_arc);
+        TextView textView = (TextView)container.findViewById(R.id.tv_pi_complete_text);
+
+        ballView.setColor(Color.BLUE);
+        ballView.setComplete(85);
+        textView.setText("85%");
     }
 
 }

@@ -37,13 +37,13 @@ public class BallView  extends View {
     }
 
     public void setComplete(int complete) {
-        this.mComplete = mComplete;
+        this.mComplete = complete;
         invalidate();
         requestLayout();
     }
 
     public void setColor(int color) {
-        this.mColor = mColor;
+        this.mColor = color;
         invalidate();
         requestLayout();
     }
