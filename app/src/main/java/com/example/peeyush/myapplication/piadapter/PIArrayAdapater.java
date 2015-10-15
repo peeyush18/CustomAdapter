@@ -16,10 +16,6 @@ import android.widget.TextView;
 
 import com.example.peeyush.myapplication.R;
 import com.example.peeyush.myapplication.circular_arc.BallView;
-import com.example.peeyush.myapplication.piadapter.PIImage;
-import com.example.peeyush.myapplication.piadapter.PIText;
-
-import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
