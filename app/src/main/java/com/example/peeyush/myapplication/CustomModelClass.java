@@ -10,7 +10,7 @@ import com.example.peeyush.myapplication.piadapter.PiBallColor;
  */
 public class CustomModelClass {
 
-    @PIImage(id=R.id.iv_test, width = 50, height = 50)
+    @PIImage(id=R.id.iv_test, width = 50, height = 50, isSourceFile = false)
     public String mImagePath;
     @PIText(id=R.id.tv_test)
     public String mName;

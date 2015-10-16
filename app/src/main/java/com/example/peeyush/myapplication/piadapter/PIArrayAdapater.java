@@ -95,7 +95,7 @@ public class PIArrayAdapater extends ArrayAdapter {
             if (annotation instanceof PIImage) {
                 ImageView imageView = (ImageView) parent.findViewById(((PIImage) annotation).id());
                 ImageDowloader imageDowloader = new ImageDowloader(imageView, ((PIImage) annotation).width(),
-                        ((PIImage) annotation).height());
+                        ((PIImage) annotation).height(), ((PIImage) annotation).isSourceFile());
                 imageDowloader.execute((String) field.get(o));
             } else if (annotation instanceof PIText) {
                 TextView textView = (TextView) parent.findViewById(((PIText) annotation).id());
@@ -157,11 +157,13 @@ public class PIArrayAdapater extends ArrayAdapter {
         ImageView mImageView;
         int mWidth;
         int mHeight;
+        boolean mIsSourceFile;
 
-        ImageDowloader(ImageView imageView, int width, int height) {
+        ImageDowloader(ImageView imageView, int width, int height, boolean isSourceFile) {
             mImageView = imageView;
             mWidth = width;
             mHeight = height;
+            mIsSourceFile = isSourceFile;
         }
 
         @Override
@@ -173,9 +175,13 @@ public class PIArrayAdapater extends ArrayAdapter {
                 options.inJustDecodeBounds = true;
                 bit = mMemoryCache.get(imageSource);
                 if (bit == null){
-                    bit = BitmapFactory.decodeStream((InputStream) new URL(imageSource).getContent(),
-                            null,
-                            null);
+                    if(mIsSourceFile){
+                        bit = ImageUtil.decodeSampledBitmapFromResource(imageSource, mWidth, mHeight);
+                    }else{
+                        bit = BitmapFactory.decodeStream((InputStream) new URL(imageSource).getContent(),
+                                null,
+                                null);
+                    }
                     mMemoryCache.put(imageSource, bit);
                 }
 

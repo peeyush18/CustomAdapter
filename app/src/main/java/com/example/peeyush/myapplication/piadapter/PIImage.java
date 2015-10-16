@@ -12,5 +12,6 @@ public @interface PIImage {
     int id();
     int width();
     int height();
+    boolean isSourceFile();
 
 }
