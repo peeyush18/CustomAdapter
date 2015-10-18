@@ -1,5 +1,7 @@
 package com.example.peeyush.myapplication.piadapter;
 
+import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,6 +25,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by peeyush on 14/10/15.
@@ -31,6 +36,7 @@ public class PIArrayAdapater extends ArrayAdapter {
     ArrayList mItemDataList;
     int mLayoutResource;
     Class mModelClass;
+    Activity mActivity;
 
     final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
     final int cacheSize = maxMemory / 8;
@@ -55,13 +61,14 @@ public class PIArrayAdapater extends ArrayAdapter {
 
 
     public PIArrayAdapater(Context context, int resource, Class modelClass,
-                           ArrayList dataList) {
+                           ArrayList dataList, Activity activity) {
         super(context, resource);
         mLayoutResource = resource;
 //        mSourceIdArray = sourceIdArray;
 //        mSourceTypeArray = sourceTypeArray;
         mItemDataList = dataList;
         mModelClass = modelClass;
+        mActivity = activity;
     }
 
     @Override
@@ -83,13 +90,15 @@ public class PIArrayAdapater extends ArrayAdapter {
                 setupView(convertView, field, mItemDataList.get(position), fields);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
+            } catch (NoActivityFoundException e) {
+                e.printStackTrace();
             }
         }
 
         return convertView;
     }
 
-    private void setupView(View parent, Field field, Object o, Field[] fields) throws IllegalAccessException {
+    private void setupView(View parent, Field field, Object o, Field[] fields) throws IllegalAccessException, NoActivityFoundException {
         Annotation[] annotations = field.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             if (annotation instanceof PIImage) {
@@ -105,8 +114,61 @@ public class PIArrayAdapater extends ArrayAdapter {
                 BallView ballView = (BallView) relativeLayout.findViewById(R.id.bv_pi_arc);
                 TextView textView = (TextView) relativeLayout.findViewById(R.id.tv_pi_complete_text);
                 setupArc(o, field, fields, ballView, textView);
+            }else if(annotation instanceof PIDatePickerDialog){
+                if(mActivity==null){
+                    throw new NoActivityFoundException();
+                }
+                TextView dateTextView = (TextView)parent.findViewById(((PIDatePickerDialog) annotation).id());
+                String dateText = (String) field.get(o);
+                dateTextView.setText(dateText);
+                createDatePickerOnClick(dateTextView, o, field, ((PIDatePickerDialog) annotation).isDeafultDateSet(),
+                        ((PIDatePickerDialog) annotation).allowFutureDate());
             }
         }
+    }
+
+    private void createDatePickerOnClick(final TextView dateTextView, final Object o, final Field field, final boolean defaultDateSet, final boolean allowFutureDate) {
+        dateTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    createDatePicker(dateTextView, o, field, defaultDateSet, allowFutureDate);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+    private void createDatePicker(final TextView dateText, final Object o, final Field field, boolean deafultDateSet, boolean allowFutureDate) throws IllegalAccessException {
+        String datePickerText = (String) field.get(o);
+        Date date = DateTimeUtil.getDateForDate(datePickerText);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(mActivity,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        String dateStr = ""+year+"-"+monthOfYear+"-"+dayOfMonth;
+                        try {
+                            field.set(o ,dateStr);
+                            dateText.setText(dateStr);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH)+1,
+                cal.get(Calendar.DAY_OF_MONTH)
+                );
+
+        if(!allowFutureDate)
+            datePickerDialog.getDatePicker().setMaxDate(new Date().getTime());
+
+        datePickerDialog.setCanceledOnTouchOutside(true);
+        datePickerDialog.show();
     }
 
     private void setupArc(Object o, Field field, Field[] fields, BallView ballView, TextView textView) throws IllegalAccessException {

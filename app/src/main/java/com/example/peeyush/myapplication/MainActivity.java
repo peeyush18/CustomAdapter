@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity
         ArrayList<CustomModelClass> dataList = new ArrayList<>();
         for(int i=0; i<10; i++){
             CustomModelClass customModelClass = new CustomModelClass();
-            customModelClass.mImagePath="http://www2.psd100.com/ppp/2013/11/0601/Cute-penguin-icon-1106085131.png";
+            //customModelClass.mImagePath="http://www2.psd100.com/ppp/2013/11/0601/Cute-penguin-icon-1106085131.png";
             customModelClass.mName = "Peeyush-"+i;
             customModelClass.mComplete = (int) (Math.random()*100);
             customModelClass.mArcColor = (int) (Math.random()*0xFFFFFF);
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         PIArrayAdapater piArrayAdapater = new PIArrayAdapater(getApplicationContext(), R.layout.list_item_test_layout,
-                CustomModelClass.class,dataList);
+                CustomModelClass.class,dataList, this);
         mListView.setAdapter(piArrayAdapater);
 
     }
