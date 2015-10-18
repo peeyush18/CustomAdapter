@@ -184,6 +184,8 @@ public class PIArrayAdapater extends ArrayAdapter {
                 timeCalendar.get(Calendar.MINUTE),
                 true
             );
+
+        timePickerDialog.show();
     }
 
     private void createDatePicker(final TextView dateText, final Object o, final Field field, boolean deafultDateSet, boolean allowFutureDate) throws IllegalAccessException {

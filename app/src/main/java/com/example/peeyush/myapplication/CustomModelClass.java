@@ -3,6 +3,7 @@ package com.example.peeyush.myapplication;
 import com.example.peeyush.myapplication.piadapter.PIBall;
 import com.example.peeyush.myapplication.piadapter.PIDatePickerDialog;
 import com.example.peeyush.myapplication.piadapter.PIText;
+import com.example.peeyush.myapplication.piadapter.PITimePickerDialog;
 import com.example.peeyush.myapplication.piadapter.PiBallColor;
 
 /**
@@ -18,7 +19,9 @@ public class CustomModelClass {
     public int mComplete;
     @PiBallColor()
     public int mArcColor;
-    @PIDatePickerDialog(id = R.id.tv_test_date, isDefaultDateSet = true, allowFutureDate = true)
-    public String mDateStr="2015-10-18";
+//    @PIDatePickerDialog(id = R.id.tv_test_date, isDefaultDateSet = true, allowFutureDate = true)
+//    public String mDateStr="2015-10-18";
+    @PITimePickerDialog(id = R.id.tv_test_date, isDefaultTimeSet = true, allowFutureTime = true)
+    public String mTimeStr="13:44";
 
 }
