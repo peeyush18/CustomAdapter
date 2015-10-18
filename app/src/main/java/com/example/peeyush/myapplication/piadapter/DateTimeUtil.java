@@ -184,6 +184,13 @@ public class DateTimeUtil {
         return dateFormat.format(cal.getTime());
     }
 
+    public static Calendar getTime(String timeStr){
+        Date date = getDate("HH:mm" , timeStr);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal;
+    }
+
     public static Date getDate(String format, String dateStr) {
         SimpleDateFormat formats = new SimpleDateFormat(format);
         Date date = null;

@@ -2,6 +2,7 @@ package com.example.peeyush.myapplication.piadapter;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +17,7 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.example.peeyush.myapplication.R;
 import com.example.peeyush.myapplication.circular_arc.BallView;
@@ -64,8 +66,6 @@ public class PIArrayAdapater extends ArrayAdapter {
                            ArrayList dataList, Activity activity) {
         super(context, resource);
         mLayoutResource = resource;
-//        mSourceIdArray = sourceIdArray;
-//        mSourceTypeArray = sourceTypeArray;
         mItemDataList = dataList;
         mModelClass = modelClass;
         mActivity = activity;
@@ -121,11 +121,34 @@ public class PIArrayAdapater extends ArrayAdapter {
                 TextView dateTextView = (TextView)parent.findViewById(((PIDatePickerDialog) annotation).id());
                 String dateText = (String) field.get(o);
                 dateTextView.setText(dateText);
-                createDatePickerOnClick(dateTextView, o, field, ((PIDatePickerDialog) annotation).isDeafultDateSet(),
+                createDatePickerOnClick(dateTextView, o, field, ((PIDatePickerDialog) annotation).isDefaultDateSet(),
                         ((PIDatePickerDialog) annotation).allowFutureDate());
+            }else if(annotation instanceof PITimePickerDialog){
+                if(mActivity==null){
+                    throw new NoActivityFoundException();
+                }
+                TextView timeTextView = (TextView)parent.findViewById(((PITimePickerDialog) annotation).id());
+                String timeText = (String)field.get(o);
+                timeTextView.setText(timeText);
+                creatTimePickerDialogOnCLick(timeTextView, o, field,((PITimePickerDialog) annotation).isDefaultTimeSet(),
+                        ((PITimePickerDialog)annotation).allowFutureTime());
             }
         }
     }
+
+    private void creatTimePickerDialogOnCLick(final TextView timeTextView, final Object o, final Field field, final boolean defaultTimeSet, final boolean allowFutureTime) {
+        timeTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    createTimePickerDialog( timeTextView, o, field, defaultTimeSet, allowFutureTime);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 
     private void createDatePickerOnClick(final TextView dateTextView, final Object o, final Field field, final boolean defaultDateSet, final boolean allowFutureDate) {
         dateTextView.setOnClickListener(new View.OnClickListener() {
@@ -140,6 +163,28 @@ public class PIArrayAdapater extends ArrayAdapter {
         });
     }
 
+
+    private void createTimePickerDialog(final TextView timeTextView, final Object o, final Field field, boolean defaultTimeSet, boolean allowFutureTime) throws IllegalAccessException {
+        String timePickerText = (String)field.get(o);
+        Calendar timeCalendar = DateTimeUtil.getTime(timePickerText);
+        TimePickerDialog timePickerDialog = new TimePickerDialog(mActivity,
+                new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        String timeText = ""+hourOfDay+":"+minute;
+                        timeTextView.setText(timeText);
+                        try {
+                            field.set(o, timeText);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                timeCalendar.get(Calendar.HOUR_OF_DAY),
+                timeCalendar.get(Calendar.MINUTE),
+                true
+            );
+    }
 
     private void createDatePicker(final TextView dateText, final Object o, final Field field, boolean deafultDateSet, boolean allowFutureDate) throws IllegalAccessException {
         String datePickerText = (String) field.get(o);

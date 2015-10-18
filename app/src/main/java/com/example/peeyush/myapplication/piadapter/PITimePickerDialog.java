@@ -4,11 +4,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Created by peeyush on 17/10/15.
+ * Created by peeyush on 18/10/15.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PIDatePickerDialog {
+public @interface PITimePickerDialog {
     int id();
-    boolean isDefaultDateSet();
-    boolean allowFutureDate();
+    boolean isDefaultTimeSet();
+    boolean allowFutureTime();
 }
