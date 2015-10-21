@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -29,6 +30,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Created by peeyush on 14/10/15.
@@ -39,6 +42,7 @@ public class PIArrayAdapater extends ArrayAdapter {
     int mLayoutResource;
     Class mModelClass;
     Activity mActivity;
+    OnButtonClickLIstener mButtonClickListener;
 
     final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
     final int cacheSize = maxMemory / 8;
@@ -61,6 +65,15 @@ public class PIArrayAdapater extends ArrayAdapter {
         }
     };
 
+    public PIArrayAdapater(Context context, int resource, Class modelClass,
+                           ArrayList dataList, Activity activity, OnButtonClickLIstener buttonClickLIstener){
+        super(context, resource);
+        mLayoutResource = resource;
+        mItemDataList = dataList;
+        mModelClass = modelClass;
+        mActivity = activity;
+        mButtonClickListener = buttonClickLIstener;
+    }
 
     public PIArrayAdapater(Context context, int resource, Class modelClass,
                            ArrayList dataList, Activity activity) {
@@ -69,6 +82,7 @@ public class PIArrayAdapater extends ArrayAdapter {
         mItemDataList = dataList;
         mModelClass = modelClass;
         mActivity = activity;
+        mButtonClickListener = null;
     }
 
     @Override
@@ -80,17 +94,27 @@ public class PIArrayAdapater extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        convertView = layoutInflater.inflate(mLayoutResource, parent, false);
+        PIViewHolder viewHolder=null;
+        if(convertView==null){
+            convertView = layoutInflater.inflate(mLayoutResource, parent, false);
+            viewHolder = new PIViewHolder();
+            convertView.setTag(viewHolder);
+        }else{
+            viewHolder = (PIViewHolder) convertView.getTag();
+        }
+
 
 
         Field[] fields = mModelClass.getDeclaredFields();
         // View[] itemViews = new View[mSourceIdArray.length];
         for (Field field : fields) {
             try {
-                setupView(convertView, field, mItemDataList.get(position), fields);
+                setupView(viewHolder, convertView, field, mItemDataList.get(position), fields);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (NoActivityFoundException e) {
+                e.printStackTrace();
+            } catch (NoButtonClickListenerAttachedException e) {
                 e.printStackTrace();
             }
         }
@@ -98,11 +122,22 @@ public class PIArrayAdapater extends ArrayAdapter {
         return convertView;
     }
 
-    private void setupView(View parent, Field field, Object o, Field[] fields) throws IllegalAccessException, NoActivityFoundException {
+    private View getViewFrom(View parent, int id, PIViewHolder viewHolder){
+        View view= null;
+        if((view = viewHolder.viewHolder.get(id))==null){
+            view = parent.findViewById(id);
+            viewHolder.viewHolder.put(id, view);
+        }
+
+
+        return view;
+    }
+
+    private void setupView(PIViewHolder viewHolder, View parent, Field field, Object o, Field[] fields) throws IllegalAccessException, NoActivityFoundException, NoButtonClickListenerAttachedException {
         Annotation[] annotations = field.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             if (annotation instanceof PIImage) {
-                ImageView imageView = (ImageView) parent.findViewById(((PIImage) annotation).id());
+                ImageView imageView = (ImageView) getViewFrom(parent,((PIImage) annotation).id() , viewHolder);
                 ImageDowloader imageDowloader = new ImageDowloader(imageView, ((PIImage) annotation).width(),
                         ((PIImage) annotation).height(), ((PIImage) annotation).isSourceFile());
                 imageDowloader.execute((String) field.get(o));
@@ -132,8 +167,23 @@ public class PIArrayAdapater extends ArrayAdapter {
                 timeTextView.setText(timeText);
                 creatTimePickerDialogOnCLick(timeTextView, o, field,((PITimePickerDialog) annotation).isDefaultTimeSet(),
                         ((PITimePickerDialog)annotation).allowFutureTime());
+            }else if(annotation instanceof PIButton){
+                if(mButtonClickListener==null){
+                    throw new NoButtonClickListenerAttachedException();
+                }
+                Button button = (Button)parent.findViewById(((PIButton) annotation).id());
+                createButton(button);
             }
         }
+    }
+
+    private void createButton(Button button) {
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mButtonClickListener.onButtonClick(v.getId());
+            }
+        });
     }
 
     private void creatTimePickerDialogOnCLick(final TextView timeTextView, final Object o, final Field field, final boolean defaultTimeSet, final boolean allowFutureTime) {
@@ -311,5 +361,9 @@ public class PIArrayAdapater extends ArrayAdapter {
             if (bitmap != null)
                 mImageView.setImageBitmap(bitmap);
         }
+    }
+
+    class PIViewHolder{
+        HashMap<Integer, View> viewHolder = new HashMap<>();
     }
 }
