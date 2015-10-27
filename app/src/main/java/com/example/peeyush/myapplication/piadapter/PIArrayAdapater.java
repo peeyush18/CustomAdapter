@@ -143,7 +143,7 @@ public class PIArrayAdapater extends ArrayAdapter {
                 imageDowloader.execute((String) field.get(o));
             } else if (annotation instanceof PIText) {
                 TextView textView = (TextView) parent.findViewById(((PIText) annotation).id());
-                textView.setText((String) field.get(o));
+                textView.setText(""+ field.get(o));
             } else if (annotation instanceof PIBall) {
                 RelativeLayout relativeLayout = (RelativeLayout) parent.findViewById(((PIBall) annotation).id());
                 BallView ballView = (BallView) relativeLayout.findViewById(R.id.bv_pi_arc);
