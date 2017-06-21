@@ -52,11 +52,11 @@ public class ImageUtil {
         if (reqHeight > 0) {
             height = reqHeight;
             double scaleDownFactor = height / outHeight;
-            width = (int) (options.outWidth * ascpectRatio * scaleDownFactor);
+            width = (int) (options.outWidth * scaleDownFactor);
         } else {
             width = reqWidth;
             double scaleDownFactor = width / outWidth;
-            height = (int) (options.outHeight * ascpectRatio * scaleDownFactor);
+            height = (int) (options.outHeight * scaleDownFactor);
         }
 
 
